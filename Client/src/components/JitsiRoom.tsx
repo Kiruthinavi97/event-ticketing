@@ -1,9 +1,9 @@
 import { useEffect, useRef } from 'react'
 interface JitsiRoomProps {
-  roomName: string
-  displayName: string
-  isModerator?: boolean
-  onReady?: () => void
+  readonly roomName: string
+  readonly displayName: string
+  readonly isModerator?: boolean
+  readonly onReady?: () => void
 }
 export default function JitsiRoom({ roomName, displayName, isModerator, onReady }: JitsiRoomProps) {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -16,7 +16,7 @@ export default function JitsiRoom({ roomName, displayName, isModerator, onReady 
     let api: { dispose: () => void; addEventListener: (event: string, cb: () => void) => void } | null = null
     script.onload = () => {
       // @ts-expect-error JitsiMeetExternalAPI loaded globally
-      api = new JitsiMeetExternalAPI('meet.jit.si', {
+      const instance = new JitsiMeetExternalAPI('meet.jit.si', {
         roomName,
         parentNode: container,
         width: '100%',
@@ -45,7 +45,8 @@ export default function JitsiRoom({ roomName, displayName, isModerator, onReady 
         },
         userInfo: { displayName },
       })
-      api.addEventListener('videoConferenceJoined', () => onReady?.())
+            api = instance
+      instance.addEventListener('videoConferenceJoined', () => onReady?.())
     }
     document.body.appendChild(script)
     return () => {
